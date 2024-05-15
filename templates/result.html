@@ -1,9 +1,44 @@
 {% extends "base.html" %}
+
+{% set title = "Kết quả" %}
+
+
 {% block content %}
-    <h1>Kết quả </h1>
-    <h1>
-        <p>Number of detected faces: {{ faces }}</p>
-        <p>Result: {{ result }}</p>
-    </h1>
-    <a href="{{ url_for('login') }}">Quay về trang đăng nhập</a>
+    <h1>Các khuôn mặt được xác định ở vị trí:</h1>
+    <p>Haar cascade: Số lượng: {{ face_result_dto.faces_detected_haar_cascade|length }}</p>
+    <ul>
+        {% for location in face_result_dto.faces_detected_haar_cascade %}
+            <li>{{ location }}</li>
+        {% endfor %}
+    </ul>
+    <p>HOG: Số lượng: {{ face_result_dto.faces_detected_hog|length }}</p>
+    <ul>
+        {% for location in face_result_dto.faces_detected_hog %}
+            <li>{{ location }}</li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <p>Kết quả nhận diện của phương pháp CNN: </p>
+    {% if face_result_dto.hog_result|length == 0 %}
+        <li>Không có kết quả</li>
+    {% else %}
+        <ul>
+            {% for result in face_result_dto.cnn_result %}
+                <li>{{ result }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <p>Kết quả nhận diện của phương pháp HOG: </p>
+
+    {% if face_result_dto.hog_result|length == 0 %}
+        <li>Không có kết quả</li>
+    {% else %}
+        <ul>
+
+            {% for result in face_result_dto.hog_result %}
+                <li>{{ result }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <a href="{{ url_for('home.post_login') }}">Quay về trang đăng nhập</a>
 {% endblock %}
