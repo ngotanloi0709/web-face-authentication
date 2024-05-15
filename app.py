@@ -53,7 +53,7 @@ def login():
         faces = detect_faces(save_path)
 
         # Nhận diện khuôn mặt bằng Face Recognition
-        result = authenticationService.recognize_faces(save_path)
+        result = authenticationService.recognize_faces(save_path, 0.4)
 
         return render_template('result.html', faces=f"Face detected at: {faces} total: {len(faces)}",
                                result=f"Recognized faces of : {result} total: {len(result)} peoples")

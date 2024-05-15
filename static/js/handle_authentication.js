@@ -36,6 +36,5 @@ async function convertToBase64() {
     result = await new Promise((resolve, reject) => {
         reader.onload = () => resolve(reader.result)
     });
-
     return result;
 }
