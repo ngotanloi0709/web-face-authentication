@@ -21,6 +21,18 @@ class FaceDetectionService:
 		return faces
 
 	@staticmethod
+	def detect_faces_by_cnn_face_recognition(image_path):
+		# Load the image
+		image = face_recognition.load_image_file(image_path)
+
+		if image is None:
+			print(f"Failed to load image at {image_path}")
+			return []
+
+		face_locations = face_recognition.face_locations(image, model="cnn")
+		return [list(face_location) for face_location in face_locations]
+
+	@staticmethod
 	def detect_faces_by_hog_face_recognition(image_path):
 		# Load the image
 		image = face_recognition.load_image_file(image_path)

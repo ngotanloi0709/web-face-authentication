@@ -8,21 +8,22 @@ from utils.DataWriter import DataWriter
 
 
 class CNNFaceAuthenticationService:
-	def __init__(self):
+	def __init__(self, training_data_path, model_path="known_faces_cnn.json"):
 		print("CNNFaceAuthenticationService init")
 		self.known_faces = {}
-		self.face_dir = 'faces'
-		self.json_file = 'known_faces_cnn.json'
+		self.face_dir = training_data_path
+		self.model_file = model_path
 
 		# Kiểm tra xem file json đã tồn tại và có kích thước lớn hơn 0 không
-		if os.path.exists(self.json_file) and os.path.getsize(self.json_file) > 0:
-			with open(self.json_file, 'r') as f:
-				self.known_faces = {k: [np.array(vi) for vi in v] for k, v in json.load(f).items()}
 		# Nếu không, chúng ta gọi phương thức register để tạo file json và train lại dữ liệu
-		else:
-			self.register()
+		if not os.path.exists(self.model_file) or not os.path.getsize(self.model_file) > 0:
+			self.train()
 
-	def register(self):
+		self.load_known_faces()
+
+	def train(self):
+		print("CNNFaceAuthenticationService start training")
+
 		# Vòng for đầu tiên lặp qua các thư mục trong thư mục faces
 		for person in os.listdir(self.face_dir):
 			# Trong mỗi vòng lặp,  ta xây dựng đường dẫn đầy đủ đến thư mục của người đó
@@ -44,9 +45,9 @@ class CNNFaceAuthenticationService:
 		for person, face_encodings in self.known_faces.items():
 			print(f"CNN Registered {len(face_encodings)} images for {person}")
 
-		DataWriter.write_known_faces_to_file(self.known_faces, self.json_file)
+		DataWriter.write_known_faces_cnn_to_file(self.known_faces, self.model_file)
 
-	def recognize_faces(self, image_path, min_distance=0.5):
+	def recognize_faces(self, image_path, min_distance=0.45):
 		unknown_image = face_recognition.load_image_file(image_path)
 		unknown_face_encodings = face_recognition.face_encodings(unknown_image)
 
@@ -59,8 +60,12 @@ class CNNFaceAuthenticationService:
 				face_distances = face_recognition.face_distance(known_face_encodings, unknown_face_encoding)
 				if min(face_distances) < min_distance:
 					recognized_faces.append(person)
-					break
+					continue
 
 		print(f"CNN Recognized faces: {recognized_faces}")
 
 		return recognized_faces
+
+	def load_known_faces(self):
+		with open(self.model_file, 'r') as f:
+			self.known_faces = {k: [np.array(vi) for vi in v] for k, v in json.load(f).items()}

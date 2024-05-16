@@ -18,7 +18,7 @@ window.onload = function() {
         context.drawImage(img, 0, 0, canvas.width, canvas.height);
     };
 
-    img.src = '/static/image/default.png'; // replace with your image path
+    img.src = '/static/image/default_taken_image.jpg'; // replace with your image path
 };
 
 document.getElementById('file').addEventListener('change', function () {

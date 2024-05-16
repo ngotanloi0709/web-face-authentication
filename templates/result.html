@@ -1,44 +1,48 @@
 {% extends "base.html" %}
 
 {% set title = "Kết quả" %}
-
-
 {% block content %}
-    <h1>Các khuôn mặt được xác định ở vị trí:</h1>
-    <p>Haar cascade: Số lượng: {{ face_result_dto.faces_detected_haar_cascade|length }}</p>
-    <ul>
-        {% for location in face_result_dto.faces_detected_haar_cascade %}
-            <li>{{ location }}</li>
-        {% endfor %}
-    </ul>
-    <p>HOG: Số lượng: {{ face_result_dto.faces_detected_hog|length }}</p>
-    <ul>
-        {% for location in face_result_dto.faces_detected_hog %}
-            <li>{{ location }}</li>
-        {% endfor %}
-    </ul>
-    <hr>
-    <p>Kết quả nhận diện của phương pháp CNN: </p>
-    {% if face_result_dto.hog_result|length == 0 %}
-        <li>Không có kết quả</li>
-    {% else %}
-        <ul>
-            {% for result in face_result_dto.cnn_result %}
-                <li>{{ result }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <p>Kết quả nhận diện của phương pháp HOG: </p>
-
-    {% if face_result_dto.hog_result|length == 0 %}
-        <li>Không có kết quả</li>
-    {% else %}
-        <ul>
-
-            {% for result in face_result_dto.hog_result %}
-                <li>{{ result }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    <a href="{{ url_for('home.post_login') }}">Quay về trang đăng nhập</a>
+    <div class="card">
+        <div class="card-header">
+            Thông tin kết quả
+        </div>
+        <div class="card-body">
+            <h1>Các khuôn mặt được xác định ở vị trí:</h1>
+            <p>Haar cascade: Số lượng: {{ face_result_dto.faces_detected_haar_cascade|length }}</p>
+            <ul>
+                {% for location in face_result_dto.faces_detected_haar_cascade %}
+                    <li>{{ location }}</li>
+                {% endfor %}
+            </ul>
+            <p>HOG: Số lượng: {{ face_result_dto.faces_detected_hog|length }}</p>
+            <ul>
+                {% for location in face_result_dto.faces_detected_hog %}
+                    <li>{{ location }}</li>
+                {% endfor %}
+            </ul>
+            <hr>
+            <p>Kết quả nhận diện của phương pháp CNN: </p>
+            {% if face_result_dto.cnn_result|length == 0 %}
+                <li>Không có kết quả</li>
+            {% else %}
+                <ul>
+                    {% for result in face_result_dto.cnn_result %}
+                        <li>{{ result }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <hr>
+            <p>Kết quả nhận diện của phương pháp Eigenfaces (Chưa hoàn thiện): </p>
+            {% if face_result_dto.eigen_result|length == 0 %}
+                <li>Không có kết quả</li>
+            {% else %}
+                <ul>
+                    {% for result in face_result_dto.eigen_result %}
+                        <li>{{ result }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <a href="{{ url_for('home.post_login') }}">Quay về trang đăng nhập</a>
+        </div>
+    </div>
 {% endblock %}

@@ -10,6 +10,5 @@ dist/
 venv/
 faces/
 uploads/
-/known_faces.json
-/known_faces_hog.json
 /known_faces_cnn.json
+/known_faces_eigen.json

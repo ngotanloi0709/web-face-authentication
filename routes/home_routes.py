@@ -6,20 +6,20 @@ from flask import Blueprint, render_template, request, current_app
 
 from dto.FaceResultDTO import FaceResultDTO
 from services.CNNFaceAuthenticationService import CNNFaceAuthenticationService
+from services.EigenFaceAuthenticationService import EigenFaceAuthenticationService
+
 from services.FaceDetectionService import FaceDetectionService
-from services.HOGFaceAuthenticationService import HOGFaceAuthenticationService
 
 home = Blueprint('home', __name__)
 
 # Khởi tạo service nhận diện khuôn mặt
 # Trong constructor load file json ra để đỡ train lại
-cnnFaceAuthenticationService = CNNFaceAuthenticationService()
-hogFaceAuthenticationService = HOGFaceAuthenticationService()
+cnnFaceAuthenticationService = CNNFaceAuthenticationService("faces")
+eigenFaceAuthenticationService = EigenFaceAuthenticationService('faces')
 
 
 # Train lại dữ liệu trong /faces
 # cnnFaceAuthenticationService.register()
-# hogFaceAuthenticationService.register()
 
 
 @home.route('/', methods=['GET'])
@@ -41,10 +41,11 @@ def post_login():
 	faces_detected_hog = FaceDetectionService.detect_faces_by_hog_face_recognition(save_path)
 
 	# Nhận diện khuôn mặt bằng Face Recognition
-	cnn_result = cnnFaceAuthenticationService.recognize_faces(save_path, 0.5)
-	hog_result = hogFaceAuthenticationService.recognize_faces(save_path, 0.5)
+	cnn_result = cnnFaceAuthenticationService.recognize_faces(save_path)
+	# Nhận diện khuôn mặt bằng Eigenface
+	eigen_result = eigenFaceAuthenticationService.recognize_faces(save_path)
 	# Tạo FaceResultDTO để truyền vào template
-	face_result_dto = FaceResultDTO(faces_detected_haar_cascade, faces_detected_hog, cnn_result, hog_result)
+	face_result_dto = FaceResultDTO(faces_detected_haar_cascade, faces_detected_hog, cnn_result, eigen_result)
 
 	return render_template('result.html', face_result_dto=face_result_dto)
 
