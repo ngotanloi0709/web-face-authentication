@@ -7,42 +7,54 @@
             Thông tin kết quả
         </div>
         <div class="card-body">
-            <h1>Các khuôn mặt được xác định ở vị trí:</h1>
-            <p>Haar cascade: Số lượng: {{ face_result_dto.faces_detected_haar_cascade|length }}</p>
+            <h3>Các khuôn mặt được xác định ở vị trí:</h3>
+            <p>Haar cascade: Số lượng: {{ face_detection_dto.faces_detected_haar_cascade|length }}</p>
             <ul>
-                {% for location in face_result_dto.faces_detected_haar_cascade %}
+                {% for location in face_detection_dto.faces_detected_haar_cascade %}
                     <li>{{ location }}</li>
                 {% endfor %}
             </ul>
-            <p>HOG: Số lượng: {{ face_result_dto.faces_detected_hog|length }}</p>
+            <p>HOG: Số lượng: {{ face_detection_dto.faces_detected_hog|length }}</p>
             <ul>
-                {% for location in face_result_dto.faces_detected_hog %}
+                {% for location in face_detection_dto.faces_detected_hog %}
                     <li>{{ location }}</li>
                 {% endfor %}
             </ul>
             <hr>
-            <p>Kết quả nhận diện của phương pháp CNN: </p>
-            {% if face_result_dto.cnn_result|length == 0 %}
+            <h3>Kết quả nhận diện khuôn mặt</h3>
+            <p>Kết quả nhận diện của phương pháp CNN (Triển khai qua thư viện Face recognition): </p>
+            {% if face_recognition_dto.cnn_result|length == 0 %}
                 <li>Không có kết quả</li>
             {% else %}
                 <ul>
-                    {% for result in face_result_dto.cnn_result %}
+                    {% for result in face_recognition_dto.cnn_result %}
                         <li>{{ result }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
             <hr>
-            <p>Kết quả nhận diện của phương pháp Eigenfaces (Chưa hoàn thiện): </p>
-            {% if face_result_dto.eigen_result|length == 0 %}
+            <p>Kết quả nhận diện của phương pháp CNN (Triển khai qua thư viện Dlib): </p>
+            {% if face_recognition_dto.dlib_cnn_result|length == 0 %}
                 <li>Không có kết quả</li>
             {% else %}
                 <ul>
-                    {% for result in face_result_dto.eigen_result %}
+                    {% for result in face_recognition_dto.dlib_cnn_result %}
                         <li>{{ result }}</li>
                     {% endfor %}
                 </ul>
             {% endif %}
-            <a href="{{ url_for('home.post_login') }}">Quay về trang đăng nhập</a>
+            <hr>
+            <p>(Chưa hoàn thiện) Kết quả nhận diện của phương pháp Eigenfaces có thể là: </p>
+            {% if face_recognition_dto.eigen_result|length == 0 %}
+                <li>Không có kết quả</li>
+            {% else %}
+                <ul>
+                    {% for result in face_recognition_dto.eigen_result %}
+                        <li>{{ result }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <a class="btn btn-success" href="{{ url_for('home.post_login') }}">Quay về trang đăng nhập</a>
         </div>
     </div>
 {% endblock %}

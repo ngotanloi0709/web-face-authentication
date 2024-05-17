@@ -1,4 +1,5 @@
 import os
+import pickle
 import random
 
 import cv2
@@ -11,6 +12,7 @@ from utils.DataWriter import DataWriter
 class EigenFaceAuthenticationService:
 	def __init__(self, training_data_path="faces", model_path="known_faces_eigen.json", num_components=50):
 		print("EigenFaceAuthenticationService init")
+
 		self.known_faces = {}
 		self.face_dir = training_data_path
 		self.modal_file = model_path
@@ -18,7 +20,6 @@ class EigenFaceAuthenticationService:
 		self.pca = PCA(n_components=num_components, whiten=True)
 		self.knn = KNeighborsClassifier(n_neighbors=7)
 
-		# Only train if the model file doesn't exist or is empty
 		if not os.path.exists(self.modal_file) or os.path.getsize(self.modal_file) == 0:
 			self.train()
 		# else:
@@ -29,15 +30,15 @@ class EigenFaceAuthenticationService:
 		images = []
 		labels = []
 
-		for person_name in os.listdir(self.face_dir):  # Lặp qua từng người trong thư mục
+		for person_name in os.listdir(self.face_dir):
 			person_dir = os.path.join(self.face_dir, person_name)
 
 			if os.path.isdir(person_dir):
-				for image_file in os.listdir(person_dir):  # Lặp qua từng ảnh của người đó
-					if image_file.endswith(".png") or image_file.endswith(".jpg"):  # Chỉ xử lý file ảnh
+				for image_file in os.listdir(person_dir):
+					if image_file.endswith(".png") or image_file.endswith(".jpg"):
 						image_path = os.path.join(person_dir, image_file)
 						img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-						if img is not None:  # Kiểm tra ảnh đã được đọc thành công
+						if img is not None:
 							img_resized = cv2.resize(img, (100, 100)).flatten()
 							images.append(img_resized)
 							labels.append(person_name)
@@ -53,8 +54,7 @@ class EigenFaceAuthenticationService:
 		for person_name in set(labels):
 			print(f"Eigen Registered {labels.count(person_name)} images for {person_name}")
 
-		# Assuming DataWriter handles the saving of the PCA model and KNN model
-		DataWriter.write_eigenface_model(self.modal_file, self.pca, self.knn)
+		DataWriter.write__known_faces_eigen_face_to_file(self.modal_file, self.pca, self.knn)
 
 	def recognize_faces(self, image_path):
 		img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -64,12 +64,9 @@ class EigenFaceAuthenticationService:
 		img_resized = cv2.resize(img, (100, 100)).flatten()
 		unknown_eigen_image = self.pca.transform([img_resized])
 
-		# prediction = self.knn.predict(unknown_eigen_image)
-		# prediction = self.knn.predict_proba(unknown_eigen_image)
-		# return prediction
 		personal_names = self.knn.classes_
 
-		probabilities = self.knn.predict_proba(unknown_eigen_image)[0]  # Lấy mảng xác suất
+		probabilities = self.knn.predict_proba(unknown_eigen_image)[0]
 
 		result = []
 
@@ -80,5 +77,8 @@ class EigenFaceAuthenticationService:
 		return result
 
 	def load_known_faces(self):
-		# Assuming DataWriter handles the loading of PCA and KNN models
-		self.pca, self.knn = DataWriter.load_eigenface_model(self.modal_file)
+		with open(self.modal_file, 'rb') as f:
+			data = pickle.load(f)
+
+			self.pca = data['pca']
+			self.knn = data['knn']

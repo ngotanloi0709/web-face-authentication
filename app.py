@@ -23,15 +23,6 @@ def clear_jinja_cache():
 		app.jinja_env.cache = {}
 
 
-# @app.route('/login', methods=['GET', 'POST'])
-# @app.route('/', methods=['GET'])
-# def login():
-# 	if request.method == 'POST':
-#
-#
-# 	return render_template('login.html')
-
-
 # run project
 if __name__ == '__main__':
 	app.run(extra_dirs=['uploads', 'faces'])

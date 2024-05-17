@@ -4,10 +4,11 @@ import uuid
 
 from flask import Blueprint, render_template, request, current_app
 
-from dto.FaceResultDTO import FaceResultDTO
+from dto.FaceDetectionDTO import FaceDetectionDTO
+from dto.FaceRecognitionDTO import FaceRecognitionDTO
 from services.CNNFaceAuthenticationService import CNNFaceAuthenticationService
+from services.DlibCNNFaceAuthenticationService import DlibCNNFaceAuthenticationService
 from services.EigenFaceAuthenticationService import EigenFaceAuthenticationService
-
 from services.FaceDetectionService import FaceDetectionService
 
 home = Blueprint('home', __name__)
@@ -15,11 +16,8 @@ home = Blueprint('home', __name__)
 # Khởi tạo service nhận diện khuôn mặt
 # Trong constructor load file json ra để đỡ train lại
 cnnFaceAuthenticationService = CNNFaceAuthenticationService("faces")
+dlibCNNFaceAuthenticationService = DlibCNNFaceAuthenticationService("faces")
 eigenFaceAuthenticationService = EigenFaceAuthenticationService('faces')
-
-
-# Train lại dữ liệu trong /faces
-# cnnFaceAuthenticationService.register()
 
 
 @home.route('/', methods=['GET'])
@@ -35,19 +33,30 @@ def post_login():
 	base64_str = request.form['image']
 	save_path = save_image(base64_str)
 
-	# Đếm khuôn mặt bằng haar cascade OpenCV
+	# Đếm khuôn mặt bằng Haar cascade (OpenCV)
 	faces_detected_haar_cascade = FaceDetectionService.detect_faces_by_haar_cascade_open_cv(save_path)
-	# Đếm khuôn mặt bằng HOG Face Recognition
+	# Đếm khuôn mặt bằng HOG (Face Recognition)
 	faces_detected_hog = FaceDetectionService.detect_faces_by_hog_face_recognition(save_path)
 
-	# Nhận diện khuôn mặt bằng Face Recognition
+	# Nhận diện khuôn mặt bằng CNN (Face Recognition)
 	cnn_result = cnnFaceAuthenticationService.recognize_faces(save_path)
+	# Nhận diện khuôn mặt bằng CNN (Dlib)
+	dlib_cnn_result = dlibCNNFaceAuthenticationService.recognize_faces(save_path)
 	# Nhận diện khuôn mặt bằng Eigenface
 	eigen_result = eigenFaceAuthenticationService.recognize_faces(save_path)
-	# Tạo FaceResultDTO để truyền vào template
-	face_result_dto = FaceResultDTO(faces_detected_haar_cascade, faces_detected_hog, cnn_result, eigen_result)
+	# Tạo FaceDetectionDTO để truyền vào template
+	face_detection_dto = FaceDetectionDTO(
+		faces_detected_haar_cascade,
+		faces_detected_hog
+	)
+	# Tạo FaceRecognitionDTO để truyền vào template
+	face_recognition_dto = FaceRecognitionDTO(
+		cnn_result,
+		dlib_cnn_result,
+		eigen_result
+	)
 
-	return render_template('result.html', face_result_dto=face_result_dto)
+	return render_template('result.html', face_detection_dto=face_detection_dto, face_recognition_dto=face_recognition_dto)
 
 
 def save_image(base64_str):
