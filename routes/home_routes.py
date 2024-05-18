@@ -13,11 +13,14 @@ from services.FaceDetectionService import FaceDetectionService
 
 home = Blueprint('home', __name__)
 
+# create faces folder if not exists
+os.makedirs('faces', exist_ok=True)
+
 # Khởi tạo service nhận diện khuôn mặt
 # Trong constructor load file json ra để đỡ train lại
 cnnFaceAuthenticationService = CNNFaceAuthenticationService("faces")
 dlibCNNFaceAuthenticationService = DlibCNNFaceAuthenticationService("faces")
-eigenFaceAuthenticationService = EigenFaceAuthenticationService('faces')
+eigenFaceAuthenticationService = EigenFaceAuthenticationService("faces")
 
 
 @home.route('/', methods=['GET'])

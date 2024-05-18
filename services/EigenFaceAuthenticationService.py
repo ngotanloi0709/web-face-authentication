@@ -74,6 +74,8 @@ class EigenFaceAuthenticationService:
 			if probability > 0.0:
 				result.append(name)
 
+		print(f"Eigen Recognized faces: {result}")
+
 		return result
 
 	def load_known_faces(self):
