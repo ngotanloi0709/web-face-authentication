@@ -15,10 +15,11 @@ class CNNFaceAuthenticationService:
 		self.model_file = model_path
 
 		# Kiểm tra xem file json đã tồn tại và có kích thước lớn hơn 0 không
-		# Nếu không, chúng ta gọi phương thức register để tạo file json và train lại dữ liệu
 		if not os.path.exists(self.model_file) or not os.path.getsize(self.model_file) > 0:
+			# Nếu không, chúng ta gọi phương thức train để tạo file json và train lại dữ liệu
 			self.train()
 
+		# Sau khi đã có file json, chúng ta gọi phương thức load_known_faces để load dữ liệu đã train
 		self.load_known_faces()
 
 	def train(self):
@@ -45,14 +46,19 @@ class CNNFaceAuthenticationService:
 		for person, face_encodings in self.known_faces.items():
 			print(f"CNN Registered {len(face_encodings)} images for {person}")
 
+		# Ghi dữ liệu đã train vào file json
 		DataWriter.write_known_faces_cnn_to_file(self.known_faces, self.model_file)
 
 	def recognize_faces(self, image_path, min_distance=0.45):
+		# Đọc ảnh
 		unknown_image = face_recognition.load_image_file(image_path)
+		# Mã hóa khuôn mặt từ ảnh đó
 		unknown_face_encodings = face_recognition.face_encodings(unknown_image)
 
 		recognized_faces = []
+		# Vòng lặp này sẽ lặp qua tất cả các mã hóa khuôn mặt của người lạ
 		for unknown_face_encoding in unknown_face_encodings:
+			# và so sánh chúng với mã hóa khuôn mặt đã biết
 			for person, known_face_encodings in self.known_faces.items():
 				# matches = face_recognition.compare_faces(known_face_encodings, unknown_face_encoding)
 				# if True in matches:

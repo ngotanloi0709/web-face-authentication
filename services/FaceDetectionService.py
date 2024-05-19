@@ -22,7 +22,6 @@ class FaceDetectionService:
 
 	@staticmethod
 	def detect_faces_by_cnn_face_recognition(image_path):
-		# Load the image
 		image = face_recognition.load_image_file(image_path)
 
 		if image is None:
@@ -34,7 +33,6 @@ class FaceDetectionService:
 
 	@staticmethod
 	def detect_faces_by_hog_face_recognition(image_path):
-		# Load the image
 		image = face_recognition.load_image_file(image_path)
 
 		if image is None:
