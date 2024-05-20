@@ -60,7 +60,8 @@ class EigenFaceAuthenticationService:
 
 						if img is not None:
 							# Phát hiện khuôn mặt trong ảnh
-							faces = self.face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+							faces = self.face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5,
+							                                           minSize=(30, 30))
 
 							for (x, y, w, h) in faces:
 								face_img = img[y:y + h, x:x + w]
@@ -95,37 +96,40 @@ class EigenFaceAuthenticationService:
 		DataWriter.write__known_faces_eigen_face_to_file(self.modal_file, self.pca, self.knn, self.mean_face)
 
 	def recognize_faces(self, image_path):
-		result = []
-		# Đọc ảnh và chuyển về ảnh xám, thay đổi kích thước.
-		img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-		if img is None:
-			return []
+		try:
+			result = []
+			# Đọc ảnh và chuyển về ảnh xám, thay đổi kích thước.
+			img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+			if img is None:
+				return []
 
-		# Phát hiện khuôn mặt trong ảnh
-		faces = self.face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-		# Lặp qua tất cả các khuôn mặt phát hiện được
-		for (x, y, w, h) in faces:
-			face_img = img[y:y + h, x:x + w]
-			# Thay đổi kích thước ảnh về 100x100  và làm phẳng nó về 1D
-			face_img_resized = cv2.resize(face_img, (100, 100)).flatten()
-			# Trừ đi giá trị trung bình của tập dữ liệu
-			face_img_resized = face_img_resized - np.mean(face_img_resized)
-			unknown_eigen_image = self.pca.transform([face_img_resized])
+			# Phát hiện khuôn mặt trong ảnh
+			faces = self.face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+			# Lặp qua tất cả các khuôn mặt phát hiện được
+			for (x, y, w, h) in faces:
+				face_img = img[y:y + h, x:x + w]
+				# Thay đổi kích thước ảnh về 100x100  và làm phẳng nó về 1D
+				face_img_resized = cv2.resize(face_img, (100, 100)).flatten()
+				# Trừ đi giá trị trung bình của tập dữ liệu
+				face_img_resized = face_img_resized - np.mean(face_img_resized)
+				unknown_eigen_image = self.pca.transform([face_img_resized])
 
-			# Dùng KNN để dự đoán tên người từ ảnh đã chuyển đổi.
-			personal_names = self.knn.classes_
-			probabilities = self.knn.predict_proba(unknown_eigen_image)[0]
+				# Dùng KNN để dự đoán tên người từ ảnh đã chuyển đổi.
+				personal_names = self.knn.classes_
+				probabilities = self.knn.predict_proba(unknown_eigen_image)[0]
 
-			for name, probability in zip(personal_names, probabilities):
-				result.append((name, probability))
+				for name, probability in zip(personal_names, probabilities):
+					result.append((name, probability))
 
-		result.sort(key=lambda x: x[1], reverse=True)
+			result.sort(key=lambda x: x[1], reverse=True)
 
-		string_result = [f"{name} ({score})" for name, score in result]
+			string_result = [f"{name} ({score})" for name, score in result]
 
-		print(f"Eigen Recognized faces: {string_result} ")
+			print(f"Eigen Recognized faces: {string_result} ")
 
-		return string_result
+			return string_result
+		except:
+			return ["Đã xảy ra lỗi khi nhận dạng khuôn mặt bằng EigenFace. Vui lòng thử lại sau."]
 
 	def load_known_faces(self):
 		with open(self.modal_file, 'rb') as f:

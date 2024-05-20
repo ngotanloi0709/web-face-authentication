@@ -68,36 +68,40 @@ class DlibCNNFaceAuthenticationService:
 		DataWriter.write_known_faces_cnn_to_file(self.known_faces, self.model_file)
 
 	def recognize_faces(self, image_path):
-		# Đọc ảnh và chuyển đổi sang RGB
-		image = dlib.load_rgb_image(image_path)
-		# Phát hiện khuôn mặt trong ảnh
-		detected_faces = self.detector(image, 1)
+		try:
+			# Đọc ảnh và chuyển đổi sang RGB
+			image = dlib.load_rgb_image(image_path)
+			# Phát hiện khuôn mặt trong ảnh
+			detected_faces = self.detector(image, 1)
 
-		# Tính toán vector biểu diễn 128 chiều của khuôn mặt (FaceNet embedding) cho tất cả các khuôn mặt phát hiện được
-		unknown_face_descriptors = [
-			self.face_rec_model.compute_face_descriptor(image, self.shape_predictor(image, face))
-			for face in detected_faces
-		]
+			# Tính toán vector biểu diễn 128 chiều của khuôn mặt (FaceNet embedding) cho tất cả các khuôn mặt phát hiện được
+			unknown_face_descriptors = [
+				self.face_rec_model.compute_face_descriptor(image, self.shape_predictor(image, face))
+				for face in detected_faces
+			]
 
-		recognized_faces = []
+			recognized_faces = []
 
-		# Lặp qua tất cả các vector biểu diễn của khuôn mặt không xác định
-		for unknown_face_descriptor in unknown_face_descriptors:
-			# So sánh vector biểu diễn của khuôn mặt không xác định với các vector biểu diễn đã biết
-			for person, known_face_descriptors in self.known_faces.items():
-				# Tính toán độ tương đồng cosine giữa vector biểu diễn của khuôn mặt không xác định và các vector biểu diễn đã biết
-				similarities = cosine_similarity([unknown_face_descriptor], known_face_descriptors)
-				# Lấy ra chỉ số của vector biểu diễn đã biết có độ tương đồng cao nhất
-				best_match_index = np.argmax(similarities)
-				# Thêm tên người và độ tương đồng vào danh sách nhận dạng
-				recognized_faces.append((person, similarities[0][best_match_index]))
+			# Lặp qua tất cả các vector biểu diễn của khuôn mặt không xác định
+			for unknown_face_descriptor in unknown_face_descriptors:
+				# So sánh vector biểu diễn của khuôn mặt không xác định với các vector biểu diễn đã biết
+				for person, known_face_descriptors in self.known_faces.items():
+					# Tính toán độ tương đồng cosine giữa vector biểu diễn của khuôn mặt không xác định và các vector biểu diễn đã biết
+					similarities = cosine_similarity([unknown_face_descriptor], known_face_descriptors)
+					# Lấy ra chỉ số của vector biểu diễn đã biết có độ tương đồng cao nhất
+					best_match_index = np.argmax(similarities)
+					# Thêm tên người và độ tương đồng vào danh sách nhận dạng
+					recognized_faces.append((person, similarities[0][best_match_index]))
 
-		# Sắp xếp danh sách nhận dạng theo độ tương đồng giảm dần
-		recognized_faces.sort(key=lambda x: x[1], reverse=True)
-		recognized_faces = [f"{name} ({score})" for name, score in recognized_faces]
+			# Sắp xếp danh sách nhận dạng theo độ tương đồng giảm dần
+			recognized_faces.sort(key=lambda x: x[1], reverse=True)
+			recognized_faces = [f"{name} ({score})" for name, score in recognized_faces]
 
-		print(f"Dlib CNN Recognized faces: {recognized_faces}")
-		return recognized_faces
+			print(f"Dlib CNN Recognized faces: {recognized_faces}")
+			return recognized_faces
+		except:
+			return ["Đã xảy ra lỗi khi nhận dạng khuôn mặt bằng Dlib CNN. Vui lòng thử lại sau."]
+
 
 	def load_known_faces(self):
 		with open(self.model_file, 'r') as f:

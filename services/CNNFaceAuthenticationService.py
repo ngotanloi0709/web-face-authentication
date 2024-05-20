@@ -50,27 +50,30 @@ class CNNFaceAuthenticationService:
 		DataWriter.write_known_faces_cnn_to_file(self.known_faces, self.model_file)
 
 	def recognize_faces(self, image_path, min_distance=0.45):
-		# Đọc ảnh
-		unknown_image = face_recognition.load_image_file(image_path)
-		# Mã hóa khuôn mặt từ ảnh đó
-		unknown_face_encodings = face_recognition.face_encodings(unknown_image)
+		try:
+			# Đọc ảnh
+			unknown_image = face_recognition.load_image_file(image_path)
+			# Mã hóa khuôn mặt từ ảnh đó
+			unknown_face_encodings = face_recognition.face_encodings(unknown_image)
 
-		recognized_faces = []
-		# Vòng lặp này sẽ lặp qua tất cả các mã hóa khuôn mặt của người lạ
-		for unknown_face_encoding in unknown_face_encodings:
-			# và so sánh chúng với mã hóa khuôn mặt đã biết
-			for person, known_face_encodings in self.known_faces.items():
-				# matches = face_recognition.compare_faces(known_face_encodings, unknown_face_encoding)
-				# if True in matches:
-				#     recognized_faces.append(person)
-				face_distances = face_recognition.face_distance(known_face_encodings, unknown_face_encoding)
-				if min(face_distances) < min_distance:
-					recognized_faces.append(person)
-					continue
+			recognized_faces = []
+			# Vòng lặp này sẽ lặp qua tất cả các mã hóa khuôn mặt của người lạ
+			for unknown_face_encoding in unknown_face_encodings:
+				# và so sánh chúng với mã hóa khuôn mặt đã biết
+				for person, known_face_encodings in self.known_faces.items():
+					# matches = face_recognition.compare_faces(known_face_encodings, unknown_face_encoding)
+					# if True in matches:
+					#     recognized_faces.append(person)
+					face_distances = face_recognition.face_distance(known_face_encodings, unknown_face_encoding)
+					if min(face_distances) < min_distance:
+						recognized_faces.append(person)
+						continue
 
-		print(f"CNN Recognized faces: {recognized_faces}")
+			print(f"CNN Recognized faces: {recognized_faces}")
 
-		return recognized_faces
+			return recognized_faces
+		except:
+			return ["Đã xảy ra lỗi khi nhận dạng khuôn mặt bằng Face Recognition CNN. Vui lòng thử lại sau."]
 
 	def load_known_faces(self):
 		with open(self.model_file, 'r') as f:
