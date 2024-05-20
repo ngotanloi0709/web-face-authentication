@@ -10,10 +10,11 @@ class DataWriter:
 		print(f"Saved cnn-faces model to {json_file}")
 
 	@staticmethod
-	def write__known_faces_eigen_face_to_file(json_file, pca, knn):
+	def write__known_faces_eigen_face_to_file(json_file, pca, knn, mean_face):
 		with open(json_file, 'wb') as f:
 			pickle.dump({
 				'pca': pca,
-				'knn': knn
+				'knn': knn,
+				'mean_face': mean_face
 			}, f)
 		print(f"Saved Eigen-face model to {json_file}")
