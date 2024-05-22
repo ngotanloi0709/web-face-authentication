@@ -67,7 +67,7 @@ class CNNFaceAuthenticationService:
 					face_distances = face_recognition.face_distance(known_face_encodings, unknown_face_encoding)
 					if min(face_distances) < min_distance:
 						recognized_faces.append(person)
-						continue
+						break
 
 			print(f"CNN Recognized faces: {recognized_faces}")
 

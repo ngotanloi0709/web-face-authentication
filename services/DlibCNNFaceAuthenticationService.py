@@ -102,7 +102,6 @@ class DlibCNNFaceAuthenticationService:
 		except:
 			return ["Đã xảy ra lỗi khi nhận dạng khuôn mặt bằng Dlib CNN. Vui lòng thử lại sau."]
 
-
 	def load_known_faces(self):
 		with open(self.model_file, 'r') as f:
 			self.known_faces = {k: [np.array(v) for v in v_list] for k, v_list in json.load(f).items()}
